@@ -22,7 +22,9 @@ export class BrandsService {
   }
 
   async findAll() {
-    const brands = await this.brandRepository.find();
+    const brands = await this.brandRepository.find({
+      relations: ['vehicles'],
+    });
     if (brands.length === 0) {
       throw new NotFoundException('No se encontraron marcas');
     }
