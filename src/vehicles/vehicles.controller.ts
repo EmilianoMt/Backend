@@ -73,7 +73,17 @@ export class VehiclesController {
   @Patch(':id')
   @Roles(UserRole.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  update(@Param('id') id: string, @Body() updateVehicleDto: UpdateVehicleDto) {
+  @UseInterceptors(FileInterceptor('imageUrl'))
+  async update(
+    @Param('id') id: string,
+    @Body() updateVehicleDto: UpdateVehicleDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    if (file) {
+      const photo = await this.awsService.uploadFile(file);
+      updateVehicleDto.imageUrl = photo;
+    }
+
     return this.vehiclesService.update(id, updateVehicleDto);
   }
 
