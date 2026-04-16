@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
@@ -6,16 +17,47 @@ import { Roles } from '../users/decorators/roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
 import { JwtAuthGuard } from 'src/users/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/users/guard/roles.guard';
+import { AwsService } from 'src/aws/aws.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+
 
 @Controller('vehicles')
 export class VehiclesController {
-  constructor(private readonly vehiclesService: VehiclesService) {}
+  constructor(
+    private readonly vehiclesService: VehiclesService,
+    private readonly awsService: AwsService,
+  ) {}
 
-  @Post() 
+  @Post()
   @Roles(UserRole.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  create(@Body() createVehicleDto: CreateVehicleDto) {
-    return this.vehiclesService.create(createVehicleDto);
+  @UseInterceptors(FileInterceptor('imageUrl'))
+  async create(
+    @Body() createVehicleDto: CreateVehicleDto,
+    @UploadedFile() file: any,
+  ) {
+    if (!file){
+      return this.vehiclesService.create(createVehicleDto);
+    } else {
+      const photo = await this.awsService.uploadFile(file);
+      createVehicleDto.imageUrl = photo;
+      return this.vehiclesService.create(createVehicleDto);
+    }
+  }
+
+  @Post('upload/:id')
+  @Roles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const response = await this.awsService.uploadFile(file);
+    return this.vehiclesService.update(id, {
+      imageUrl: response,
+    });
   }
 
   @Get()
