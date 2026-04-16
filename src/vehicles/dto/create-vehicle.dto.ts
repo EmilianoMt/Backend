@@ -17,6 +17,9 @@ export class CreateVehicleDto {
   @IsOptional()
   isAvailable?: boolean;
 
+  @IsOptional()
+  imageUrl?: string;
+
   @IsNumber()
   brandId: number;
 }

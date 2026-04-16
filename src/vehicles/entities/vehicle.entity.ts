@@ -21,6 +21,9 @@ export class Vehicle {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
+  @Column()
+  imageUrl: string;
+
 
   @ManyToOne(() => Brand, (brand) => brand.id, { eager: true })
   @JoinColumn({ name: 'brandId' })
