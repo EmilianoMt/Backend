@@ -63,10 +63,8 @@ export class UsersService {
       role: user.role 
     };
 
-    const { password: _, ...userResult } = user;
 
     return {
-      user: userResult,
       token: this.jwtService.sign(payload),
     };
   }
