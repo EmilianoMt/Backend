@@ -7,11 +7,6 @@
 
 # Turing-IA API: Catálogo de Exhibición Automotriz
 
-<!-- ![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens) -->
 
 ## Descripción del Proyecto
 
@@ -23,34 +18,132 @@ La base de datos relacional está estructurada en **PostgreSQL** y normalizada h
 
 ## Funcionalidades Principales
 
-* **Arquitectura Modular:** Desarrollo basado en módulos, controladores y servicios siguiendo las mejores prácticas de NestJS y la separación de responsabilidades.
-* **Autenticación y Seguridad:** Implementación de inicio de sesión seguro con generación de tokens **JWT** (JSON Web Tokens).
-* **Control de Acceso Basado en Roles (RBAC):** * `ADMIN`: Acceso total para gestionar el inventario (operaciones POST, PUT, DELETE).
-    * `USER`: Acceso de solo lectura (operaciones GET) para consumir el catálogo.
-* **Gestión de Catálogo (CRUD):** Endpoints completamente funcionales para la creación, lectura, actualización y eliminación de *Marcas* y *Vehículos*.
-* **Validación de Datos:** Uso de *Pipes* y DTOs (Data Transfer Objects) para asegurar que la información entrante cumpla con las reglas de negocio antes de tocar la base de datos.
+- Registro e inicio de sesion de usuarios.
+- Autenticacion con JWT.
+- Roles:
+  - ADMIN: puede crear, editar y eliminar.
+  - USER: consulta informacion.
+- CRUD de marcas.
+- CRUD de vehiculos.
+- Carga de imagenes a S3 para vehiculos.
+- Validaciones de datos con DTOs.
 
----
+## Tecnologias
 
-## Configuración del proyecto
+- Node.js + NestJS
+- TypeScript
+- PostgreSQL
+- TypeORM
+- JWT
+- AWS S3
 
-```bash
-$ npm install
+## Requisitos del sistema
+
+Antes de ejecutar el proyecto en local, asegurate de tener:
+
+- Node.js 20 o superior
+- npm 10 o superior
+- Una base de datos PostgreSQL disponible
+- Una cuenta/bucket de AWS S3 (obligatorio por la configuracion actual del modulo AWS)
+
+## Variables de entorno
+
+Crea un archivo `.env` en la raiz del proyecto con este contenido:
+
+```env
+PORT=3000
+
+# Base de datos PostgreSQL
+# Ejemplo: postgresql://usuario:password@host:5432/nombre_db?sslmode=require
+DATABASE_URL=
+
+# JWT
+JWT_SECRET=
+JWT_EXPIRES_IN=3h
+
+# AWS S3
+ACCESSKEY_BUCKET=
+SECRETKEY_BUCKET=
+BUCKET_NAME=
 ```
 
-## Compilación y ejecución
+Notas:
+
+- `JWT_SECRET` es obligatorio para poder iniciar la API.
+- `DATABASE_URL` es obligatorio para la conexion a PostgreSQL.
+- Las 3 variables de AWS son obligatorias para iniciar correctamente el modulo de carga de imagenes.
+
+## Instalacion y ejecucion local
+
+1. Clonar el repositorio.
+2. Entrar a la carpeta del backend.
+3. Instalar dependencias.
+4. Crear el archivo `.env` con las variables anteriores.
+5. Levantar el servidor.
+
+Comandos:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+npm run start:dev
 ```
 
+La API inicia por defecto en:
+
+```text
+http://localhost:3000
+```
+
+## Scripts disponibles
+
+```bash
+# Desarrollo
+npm run start
+npm run start:dev
+npm run start:debug
+
+# Build y produccion
+npm run build
+npm run start:prod
+
+# Calidad y pruebas
+npm run lint
+npm run format
+npm run test
+npm run test:watch
+npm run test:cov
+npm run test:e2e
+```
+
+## Endpoints principales
+
+Usuarios:
+
+- `POST /users/register`
+- `POST /users/login`
+
+Marcas:
+
+- `GET /brands/findAll`
+- `GET /brands/findOne/:name`
+- `POST /brands/register` (ADMIN)
+- `PATCH /brands/:id` (ADMIN)
+- `DELETE /brands/:id` (ADMIN)
+
+Vehiculos:
+
+- `GET /vehicles`
+- `GET /vehicles/model/:model`
+- `POST /vehicles` (ADMIN)
+- `POST /vehicles/upload/:id` (ADMIN)
+- `PATCH /vehicles/:id` (ADMIN)
+- `DELETE /vehicles/:id` (ADMIN)
+
+## Flujo rapido para probar autenticacion
+
+1. Registrar usuario en `POST /users/register`.
+2. Hacer login en `POST /users/login`.
+3. Copiar el token y enviarlo como `Bearer token` en rutas protegidas.
 
 
 
